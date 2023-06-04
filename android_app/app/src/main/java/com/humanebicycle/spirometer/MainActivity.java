@@ -22,14 +22,17 @@ public class MainActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navbar);
         getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, TestFragment.newInstance()).commit();
+        bottomNavigationView.setSelectedItemId(R.id.home_nav_button);
 
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if(item.getItemId()==R.id.list_nav_button){
                     getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, ListFragment.newInstance()).commit();
+                    bottomNavigationView.setSelectedItemId(R.id.list_nav_button);
                 }else if(item.getItemId()==R.id.home_nav_button){
                     getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, TestFragment.newInstance()).commit();
+                    bottomNavigationView.setSelectedItemId(R.id.home_nav_button);
                 }else{
                     Toast.makeText(MainActivity.this, "Something went wrong!", Toast.LENGTH_SHORT).show();
                 }

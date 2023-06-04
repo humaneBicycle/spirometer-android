@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 
@@ -14,6 +15,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +29,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.humanebicycle.spirometer.MainActivity;
 import com.humanebicycle.spirometer.R;
 
+import java.io.IOException;
+
 public class TestFragment extends Fragment {
     TextInputEditText name_ET;
     Button startRecordingButton;
@@ -33,6 +38,8 @@ public class TestFragment extends Fragment {
     MediaRecorder mRecorder;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
     boolean isRecording = false;
+    String mFileName;
+    MediaPlayer mMediaPlayer;
 
     public TestFragment() {
         // Required empty public constructor
@@ -57,7 +64,6 @@ public class TestFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if(CheckPermissions() && !isRecording){
-                    micImage.setImageBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.baseline_mic_24));
                     startRecording();
                 }else if(isRecording){
                     micImage.setImageBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.baseline_mic_off_24));
@@ -99,11 +105,38 @@ public class TestFragment extends Fragment {
     }
 
     private void startRecording(){
-        
+        if(name_ET.getText().equals("")||name_ET.getText()!=null){
+            Toast.makeText(getContext(), "Please Enter Name Before Recording!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
+        long time = System.currentTimeMillis();
+
+        mFileName = mFileName+"/"+name_ET.getText().toString()+"_"+String.valueOf(time)+".3gp";
+
+
+        mRecorder = new MediaRecorder();
+
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        mRecorder.setOutputFile(mFileName);
+        try {
+            mRecorder.prepare();
+        } catch (IOException e) {
+            Log.e("TAG", "prepare() failed");
+        }
+        mRecorder.start();
+        micImage.setImageBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.baseline_mic_24));
     }
 
     private void stopRecording(){
-
+        mRecorder.stop();
+        mRecorder.release();
+        mRecorder=null;
     }
 
 }

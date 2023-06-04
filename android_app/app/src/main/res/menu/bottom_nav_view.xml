@@ -5,7 +5,7 @@
         android:icon="@drawable/baseline_home_24"/>
 
     <item android:id="@+id/list_nav_button"
-        android:title="Analytics"
-        android:icon="@drawable/baseline_analytics_24"/>
+        android:title="Records"
+        android:icon="@drawable/baseline_format_list_bulleted_24"/>
 
 </menu>
