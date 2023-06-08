@@ -9,7 +9,6 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
-import com.humanebicycle.spirometer.fragments.AnalyticsFragment;
 import com.humanebicycle.spirometer.fragments.ListFragment;
 import com.humanebicycle.spirometer.fragments.TestFragment;
 
@@ -29,10 +28,11 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if(item.getItemId()==R.id.list_nav_button){
                     getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, ListFragment.newInstance()).commit();
-                    bottomNavigationView.setSelectedItemId(R.id.list_nav_button);
+                    bottomNavigationView.getMenu().getItem(1).setChecked(true);
                 }else if(item.getItemId()==R.id.home_nav_button){
                     getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment, TestFragment.newInstance()).commit();
-                    bottomNavigationView.setSelectedItemId(R.id.home_nav_button);
+                    bottomNavigationView.getMenu().getItem(0).setChecked(false);
+
                 }else{
                     Toast.makeText(MainActivity.this, "Something went wrong!", Toast.LENGTH_SHORT).show();
                 }
