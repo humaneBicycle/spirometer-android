@@ -12,5 +12,8 @@
     <font
         android:fontStyle="normal"
         android:font="@font/poppins_italic" />
+    <font
+        android:fontStyle="normal"
+        android:font="@font/poppins_bold" />
 
 </font-family>

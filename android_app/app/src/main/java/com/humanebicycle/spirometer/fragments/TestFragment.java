@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.humanebicycle.spirometer.AnalyticsActivity;
@@ -44,7 +45,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class TestFragment extends Fragment {
-    ImageButton startRecordingButton;
+    Button startRecordingButton;
     ImageView micImage;
     Button viewResultButton;
     MediaRecorder mRecorder;
@@ -121,7 +122,8 @@ public class TestFragment extends Fragment {
                     test = null;
                     correctAudioButton.setVisibility(View.GONE);
                     wrongAudioButton.setVisibility(View.GONE);
-                    startRecordingButton.setImageDrawable(getActivity().getDrawable(R.drawable.baseline_play_arrow_24));
+                    startRecordingButton.setCompoundDrawables(getActivity().getDrawable(R.drawable.baseline_play_arrow_24),null,null,null);
+
                     recorderWaveformView.reset();
                     Toast.makeText(getContext(), "Recording is stopped!", Toast.LENGTH_SHORT).show();
                 }
@@ -135,7 +137,7 @@ public class TestFragment extends Fragment {
                     if(isRecording) {
                         mRecorder.stop();
                     }
-                    startRecordingButton.setImageDrawable(getActivity().getDrawable(R.drawable.baseline_play_arrow_24));
+                    startRecordingButton.setCompoundDrawables(getActivity().getDrawable(R.drawable.baseline_play_arrow_24),null,null,null);
 
                     isRecording=false;
                     showSaveBottomSheet();
@@ -189,7 +191,8 @@ public class TestFragment extends Fragment {
     private void startRecording(){
         micImage.setVisibility(View.GONE);
         isRecording=true;
-        startRecordingButton.setImageDrawable(getActivity().getDrawable(R.drawable.baseline_pause_24));
+        startRecordingButton.setCompoundDrawables(getActivity().getDrawable(R.drawable.baseline_pause_24),null,null,null);
+
         correctAudioButton.setVisibility(View.VISIBLE);
         wrongAudioButton.setVisibility(View.VISIBLE);
         recorderWaveformView.setVisibility(View.VISIBLE);
@@ -219,7 +222,8 @@ public class TestFragment extends Fragment {
     private void pauseRecording(){
         mRecorder.stop();
         isRecording=false;
-        startRecordingButton.setImageDrawable(getActivity().getDrawable(R.drawable.baseline_play_arrow_24));
+        startRecordingButton.setCompoundDrawables(getActivity().getDrawable(R.drawable.baseline_play_arrow_24),null,null,null);
+
     }
 
     private void animatePlayerView(){

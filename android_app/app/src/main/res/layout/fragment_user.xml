@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.UserFragment"
+    android:id="@+id/scroll_view_user_frag">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/rootLayout"
+        android:orientation="vertical"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/app_name"
+            android:id="@+id/notification"
+            android:textSize="32sp"
+            android:fontFamily="@font/poppins_black"
+            android:textColor="?attr/colorPrimary"
+            android:layout_margin="16dp"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="?attr/colorSurfaceContainer"
+            app:cardCornerRadius="8dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="24dp"
+                android:paddingBottom="24dp"
+                android:orientation="horizontal"
+                android:id="@+id/userInfoLayout"
+                android:gravity="center_vertical"
+                >
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:id="@+id/displayImg"
+                    android:src="@mipmap/ic_launcher" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/nameTxt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_regular"
+                        android:text="Anonymous User"
+                        android:textSize="20sp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/phoneNumTxt"
+                        android:text="+91 XXXXX XXXXX"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/poppins_regular" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/signUpTxt"
+                        android:text="Sign Up"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/poppins_regular" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableTop="@drawable/ic_baseline_edit_24"
+                    android:drawableTint="@color/design_default_color_secondary"
+                    android:text="Edit"
+                    android:id="@+id/editProfileTxt"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/poppins_regular"
+                    android:textColor="@color/design_default_color_secondary" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <LinearLayout
+            android:layout_marginTop="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:orientation="vertical">
+
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/backup_tests"
+                android:text="@string/backup_tests"
+                android:textAllCaps="false"
+                android:fontFamily="@font/poppins_regular"
+                android:padding="16dp"
+                android:textSize="18sp"
+                android:textAlignment="textStart"
+                android:drawableRight="@drawable/ic_baseline_navigate_next_24"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/logOutBtn"
+                android:text="@string/log_out"
+                android:textAllCaps="false"
+                android:fontFamily="@font/poppins_regular"
+                android:padding="16dp"
+                android:textSize="18sp"
+                android:textAlignment="textStart"
+                android:drawableRight="@drawable/ic_baseline_navigate_next_24"
+                />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

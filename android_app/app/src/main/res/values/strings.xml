@@ -13,4 +13,21 @@
     <string name="select_filter">Select Filter</string>
     <string name="test_results">Test Results</string>
     <string name="review_recording">Review Recording</string>
+    <string name="login">Login</string>
+    <string name="welcome_text">Welcome!</string>
+    <string name="login_info">Log into your account to backup your tests</string>
+    <string name="full_name">Full Name</string>
+    <string name="register_for_an_account">Register for an Account</string>
+    <string name="register">Register</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="enter_your_details_below">Enter your details below.</string>
+    <string name="password">Password</string>
+    <string name="email_address">Email Address</string>
+    <string name="or_sign_in_using">Or sign in using</string>
+    <string name="google">Google</string>
+    <string name="no_tests_recorded">No Tests recorded.</string>
+    <string name="log_out">Log Out</string>
+    <string name="backup_tests">Backup Tests</string>
+    <string name="backing_up">Backing Up</string>
+    <string name="something_went_wrong">Something went wrong!</string>
 </resources>
