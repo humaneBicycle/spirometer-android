@@ -5,57 +5,41 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.Image;
-import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import android.os.Environment;
-import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.humanebicycle.spirometer.AnalyticsActivity;
-import com.humanebicycle.spirometer.MainActivity;
+import com.humanebicycle.spirometer.Constants;
 import com.humanebicycle.spirometer.R;
-import com.humanebicycle.spirometer.Spirometer;
-import com.humanebicycle.spirometer.helper.XStreamSerializer;
-import com.humanebicycle.spirometer.model.SpirometerTest;
+import com.humanebicycle.spirometer.TestManager;
+import com.humanebicycle.spirometer.data.XStreamSerializer;
 import com.humanebicycle.spirometer.ui.RecorderWaveformView;
 
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class TestFragment extends Fragment {
     Button startRecordingButton;
     ImageView micImage;
-    Button viewResultButton;
-    MediaRecorder mRecorder;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
-    boolean isRecording = false;
-    String mFileName;
     ShapeableImageView wrongAudioButton, correctAudioButton;
-    SpirometerTest test;
     RecorderWaveformView recorderWaveformView;
-
+    TestManager mTestManager;
 
     public TestFragment() {
         // Required empty public constructor
@@ -70,11 +54,12 @@ public class TestFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        mTestManager = TestManager.getInstance();
+
         View view = inflater.inflate(R.layout.fragment_test, container, false);
 
         startRecordingButton=view.findViewById(R.id.record_button);
         micImage = view.findViewById(R.id.record_audio_image);
-        viewResultButton=view.findViewById(R.id.view_result);
         wrongAudioButton = view.findViewById(R.id.audio_wrong);
         correctAudioButton = view.findViewById(R.id.audio_correct);
         recorderWaveformView = view.findViewById(R.id.player_view_waveform);
@@ -82,29 +67,24 @@ public class TestFragment extends Fragment {
         startRecordingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(CheckPermissions() && !isRecording){
-                    startRecording();
-                }else if(isRecording){
-
-                    pauseRecording();
-                }else{
-
+                if(!CheckPermissions()){
                     ActivityCompat.requestPermissions(getActivity(), new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE}, REQUEST_AUDIO_PERMISSION_CODE);
+                    return;
                 }
-            }
-        });
 
-        viewResultButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(test!=null){
-                    String testString = XStreamSerializer.getInstance().serialize(test);
-                    Intent intent = new Intent(getActivity(), AnalyticsActivity.class);
-                    intent.putExtra("test",testString);
-                    startActivity(intent);
+                if(mTestManager.getCurrentState()== TestManager.State.NOT_INITIALISED){
+                    mTestManager.createTest(System.currentTimeMillis());
                 }
-                else{
-                    Toast.makeText(getActivity(), "Please record the audio first!", Toast.LENGTH_SHORT).show();
+
+                Log.d("abh", "onstart state:: "+mTestManager.getCurrentState());
+                if(mTestManager.getCurrentState()== TestManager.State.PAUSED || mTestManager.getCurrentState()== TestManager.State.INITIALISED){
+                    startRecording();
+                    return;
+                }
+
+                if(mTestManager.getCurrentState()== TestManager.State.RECORDING){
+                    pauseRecording();
+                    return;
                 }
             }
         });
@@ -112,17 +92,17 @@ public class TestFragment extends Fragment {
         wrongAudioButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mRecorder!=null){
-                    if(isRecording) {
-                        mRecorder.stop();
-                    }
-                    mRecorder.release();
-                    mRecorder=null;
-                    isRecording=false;
-                    test = null;
+                if(mTestManager.getCurrentState()== TestManager.State.RECORDING || mTestManager.getCurrentState()== TestManager.State.PAUSED){
+
+
+                    mTestManager.discardTest();
+
                     correctAudioButton.setVisibility(View.GONE);
                     wrongAudioButton.setVisibility(View.GONE);
-                    startRecordingButton.setCompoundDrawables(getActivity().getDrawable(R.drawable.baseline_play_arrow_24),null,null,null);
+                    micImage.setVisibility(View.VISIBLE);
+                    recorderWaveformView.setVisibility(View.GONE);
+
+                    startRecordingButton.setCompoundDrawablesWithIntrinsicBounds(getActivity().getDrawable(R.drawable.baseline_play_arrow_24),null,null,null);
 
                     recorderWaveformView.reset();
                     Toast.makeText(getContext(), "Recording is stopped!", Toast.LENGTH_SHORT).show();
@@ -133,13 +113,11 @@ public class TestFragment extends Fragment {
         correctAudioButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mRecorder!=null){
-                    if(isRecording) {
-                        mRecorder.stop();
-                    }
-                    startRecordingButton.setCompoundDrawables(getActivity().getDrawable(R.drawable.baseline_play_arrow_24),null,null,null);
+                if(mTestManager.getCurrentState()== TestManager.State.RECORDING || mTestManager.getCurrentState()== TestManager.State.PAUSED){
+                    mTestManager.pauseTest();
+                    startRecordingButton.setCompoundDrawablesWithIntrinsicBounds(getActivity().getDrawable(R.drawable.baseline_play_arrow_24),null,null,null);
 
-                    isRecording=false;
+
                     showSaveBottomSheet();
                 }
             }
@@ -190,48 +168,24 @@ public class TestFragment extends Fragment {
 
     private void startRecording(){
         micImage.setVisibility(View.GONE);
-        isRecording=true;
-        startRecordingButton.setCompoundDrawables(getActivity().getDrawable(R.drawable.baseline_pause_24),null,null,null);
-
+        startRecordingButton.setCompoundDrawablesWithIntrinsicBounds(getActivity().getDrawable(R.drawable.baseline_pause_24),null,null,null);
         correctAudioButton.setVisibility(View.VISIBLE);
         wrongAudioButton.setVisibility(View.VISIBLE);
         recorderWaveformView.setVisibility(View.VISIBLE);
 
-        mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        long time = System.currentTimeMillis();
-
-        mFileName = mFileName+"/"+String.valueOf(time)+".3gp";
-
-        mRecorder = new MediaRecorder();
-
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-        mRecorder.setOutputFile(mFileName);
-        try {
-            mRecorder.prepare();
-        } catch (IOException e) {
-            Log.e("TAG", "prepare() failed");
-        }
-        mRecorder.start();
-
-
+        mTestManager.startTest(getActivity());
     }
 
     private void pauseRecording(){
-        mRecorder.stop();
-        isRecording=false;
-        startRecordingButton.setCompoundDrawables(getActivity().getDrawable(R.drawable.baseline_play_arrow_24),null,null,null);
-
+        mTestManager.pauseTest();
+        startRecordingButton.setCompoundDrawablesWithIntrinsicBounds(AppCompatResources.getDrawable(getContext(),R.drawable.baseline_play_arrow_24),null,null,null);
     }
 
     private void animatePlayerView(){
-        if(isRecording) {
+        if(mTestManager.getCurrentState()== TestManager.State.RECORDING) {
             try {
-                int amplitude = mRecorder.getMaxAmplitude();
+                int amplitude = mTestManager.getmRecorder().getMaxAmplitude();
                 recorderWaveformView.updateAmps(amplitude/10);
-
             }catch (Exception e){
                 Log.e("abh", "isRecording reflected late. missed some seconds to plot waveform view" );
             }
@@ -243,7 +197,7 @@ public class TestFragment extends Fragment {
         bottomSheetDialog.setContentView(R.layout.save_audio_bottom_sheet);
         bottomSheetDialog.show();
 
-        TextInputEditText nameET = bottomSheetDialog.findViewById(R.id.name_et_save_audio_bottom_sheet);
+        TextInputLayout nameET = bottomSheetDialog.findViewById(R.id.name_et_save_audio_bottom_sheet);
         Button positiveButton = bottomSheetDialog.findViewById(R.id.ok_button_save_bottom_sheet);
         Button negativeButton = bottomSheetDialog.findViewById(R.id.cancel_button_save_bottom_sheet);
 
@@ -252,11 +206,18 @@ public class TestFragment extends Fragment {
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!nameET.getText().toString().equals("")) {
+                if(!nameET.getEditText().getText().toString().equals("")) {
                     Log.d("abh", "saving and adding audio to storgae: ");
-                    test = new SpirometerTest(nameET.getText().toString(), System.currentTimeMillis(), mFileName, System.currentTimeMillis());
-                    XStreamSerializer.getInstance().addTestToStorage(PreferenceManager.getDefaultSharedPreferences(getContext()), test);
+
                     Toast.makeText(getContext(), "Recording Saved!", Toast.LENGTH_SHORT).show();
+
+                    Intent i = new Intent(getActivity(),AnalyticsActivity.class);
+                    i.putExtra(Constants.CURRENT_TEST,XStreamSerializer.getInstance().serialize(mTestManager.getCurrentTest()));
+                    startActivity(i);
+
+                    mTestManager.setTestName(nameET.getEditText().getText().toString());
+                    mTestManager.saveTest(getContext());
+
 
                     correctAudioButton.setVisibility(View.GONE);
                     wrongAudioButton.setVisibility(View.GONE);

@@ -9,5 +9,6 @@ public class Constants {
     public static final String AUDIO_FILTER_LOW_PASS="audio_filer_low_pass";
     public static final String AUDIO_FILTER_HIGH_PASS="audio_filter_high_pass";
     public static final String SPIROMETER_TEST_LIST = "spirometer_test_list";
+    public static final String CURRENT_TEST = "current_test_shared_pref";
 
 }

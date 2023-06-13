@@ -80,7 +80,6 @@ class RecorderWaveformView: View {
             var rectDown = RectF(sw-i*(w+d), delta-2, sw-i*(w+d) - w, delta+amps[i])
             spikes.add(rectUp)
             spikes.add(rectDown)
-            Log.d("abh", "updateAmps: spikes: "+rectUp)
         }
         invalidate()
     }

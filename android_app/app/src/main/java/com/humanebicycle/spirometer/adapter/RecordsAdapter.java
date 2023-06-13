@@ -10,12 +10,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.humanebicycle.spirometer.AnalyticsActivity;
+import com.humanebicycle.spirometer.Constants;
 import com.humanebicycle.spirometer.R;
-import com.humanebicycle.spirometer.helper.XStreamSerializer;
+import com.humanebicycle.spirometer.data.XStreamSerializer;
 import com.humanebicycle.spirometer.model.SpirometerTest;
 
 import java.text.DateFormat;
@@ -45,13 +47,24 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordHo
         SpirometerTest test = tests.get(tests.size()-position-1);
         holder.heading.setText(test.getName());
         holder.subHeading.setText(String.valueOf(DateFormat.getDateTimeInstance().format(test.getTime())));
+
         holder.testRecordItemParent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, AnalyticsActivity.class);
                 String testToAnalyze = XStreamSerializer.getInstance().serialize(test);
-                intent.putExtra("test",testToAnalyze);
+                intent.putExtra(Constants.CURRENT_TEST,testToAnalyze);
                 context.startActivity(intent);
+            }
+        });
+
+        holder.testRecordItemParent.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                TestLongClickOptions testLongClickOptions = new TestLongClickOptions(test);
+                FragmentManager manager = ((AppCompatActivity)context).getSupportFragmentManager();
+                testLongClickOptions.show(manager,"testLongClickOptions");
+                return true;
             }
         });
     }

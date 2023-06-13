@@ -1,14 +1,11 @@
 package com.humanebicycle.spirometer.fragments;
 
-import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,16 +15,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.humanebicycle.spirometer.R;
-import com.humanebicycle.spirometer.helper.XStreamSerializer;
+import com.humanebicycle.spirometer.data.XStreamSerializer;
 import com.humanebicycle.spirometer.model.SpirometerTest;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 public class PreviewAudioFragment extends Fragment {
 

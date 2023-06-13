@@ -1,10 +1,16 @@
 package com.humanebicycle.spirometer.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SpirometerTest {
-    String name;
-    long time;
-    String audioAddress;
-    boolean isProcessed=false;
+    public String name;
+    public long time;
+    public String audioAddress;
+    public boolean isProcessed=false;
+
+    public List<Acceleration> accelerationList;
+
 
     public long getId() {
         return id;
@@ -14,13 +20,15 @@ public class SpirometerTest {
         this.id = id;
     }
 
-    long id;
+    public long id;
 
-    public SpirometerTest(String name, long time, String audioAddress, long id){
-        this.name=name;
-        this.audioAddress=audioAddress;
+
+    public SpirometerTest(long time, String audioAddress){
         this.time=time;
-        this.id=id;
+        this.id=time;
+        this.audioAddress=audioAddress;
+
+        accelerationList = new ArrayList<>();
     }
 
     public String getName() {
@@ -55,4 +63,12 @@ public class SpirometerTest {
         isProcessed = processed;
     }
 
+
+    public List<Acceleration> getAccelerationList() {
+        return accelerationList;
+    }
+
+    public void setAccelerationList(List<Acceleration> accelerationList) {
+        this.accelerationList = accelerationList;
+    }
 }
