@@ -15,18 +15,19 @@ import com.humanebicycle.spirometer.utils.FileUtil;
 import com.humanebicycle.spirometer.data.XStreamSerializer;
 import com.humanebicycle.spirometer.model.SpirometerTest;
 
+import java.io.File;
 import java.io.IOException;
 
 public class TestManager {
 
-    private static TestManager instance;
-    private Context applicationContext;
     static SpirometerTest test;
     SensorManager sensorManager;
     Sensor sensor;
     SensorEventListener sensorEventListener;
     MediaRecorder mRecorder;
     String mFileName;
+
+    OnOrientationChangeListener onOrientationChangeListener;
 
     /**
      * These are the states for the test.
@@ -40,18 +41,16 @@ public class TestManager {
         PAUSED
     }
 
-    public TestManager() {
+    public TestManager(OnOrientationChangeListener onOrientationChangeListener) {
+        this.onOrientationChangeListener=onOrientationChangeListener;
     }
 
     public State getCurrentState(){
         return this.STATE;
     }
 
-    public static TestManager getInstance(){
-        if(instance==null){
-            instance= new TestManager();
-        }
-        return instance;
+    public static TestManager getInstance(OnOrientationChangeListener onOrientationChangeListener){
+        return new TestManager(onOrientationChangeListener);
     }
 
     //start, pause, discard, save
@@ -83,6 +82,7 @@ public class TestManager {
                 mRecorder.prepare();
             } catch (IOException e) {
                 Log.e("TAG", "prepare() failed");
+                return;
             }
             mRecorder.start();
             registerAccelerometer(activity);
@@ -114,6 +114,10 @@ public class TestManager {
             mRecorder.stop();
         }
         mRecorder.release();
+        File file = new File(test.getAudioAddress());
+        if(!file.delete()){
+            Log.d("abh", "discardTest: t can't delete discarded audio file!");
+        }
         mRecorder=null;
         test = null;
         STATE = State.NOT_INITIALISED;
@@ -141,9 +145,11 @@ public class TestManager {
         sensorEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
-                Acceleration a = new Acceleration(event.values,System.currentTimeMillis());
-                test.getAccelerationList().add(a);
-                Log.d("abh", "accelera  tion at : "+a.timeStamp+" is x:" +a.X + " y:"+a.Y+" z:"+a.Z);
+                Acceleration a = new Acceleration(event.values, System.currentTimeMillis());
+                onOrientationChangeListener.onOrientationChange(a);
+                if(STATE==State.RECORDING && test!=null) {
+                    test.getAccelerationList().add(a);
+                }
             }
 
             @Override

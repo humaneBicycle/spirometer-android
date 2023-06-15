@@ -3,10 +3,12 @@ package com.humanebicycle.spirometer.fragments;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -25,21 +28,44 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.humanebicycle.spirometer.AnalyticsActivity;
 import com.humanebicycle.spirometer.Constants;
+import com.humanebicycle.spirometer.OnOrientationChangeListener;
 import com.humanebicycle.spirometer.R;
 import com.humanebicycle.spirometer.TestManager;
 import com.humanebicycle.spirometer.data.XStreamSerializer;
-import com.humanebicycle.spirometer.ui.RecorderWaveformView;
+import com.humanebicycle.spirometer.model.Acceleration;
+import com.humanebicycle.spirometer.view.GyroscopeView;
+import com.humanebicycle.spirometer.view.RecorderWaveformView;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class TestFragment extends Fragment {
+public class TestFragment extends Fragment implements OnOrientationChangeListener {
     Button startRecordingButton;
     ImageView micImage;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
     ShapeableImageView wrongAudioButton, correctAudioButton;
     RecorderWaveformView recorderWaveformView;
     TestManager mTestManager;
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        //remove all listeners, avoid memory leak
+        mTestManager = TestManager.getInstance(this);
+
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        //attack all the listeners
+        mTestManager = TestManager.getInstance(this);
+
+
+    }
+
+    TextView degreeTextView;
+    GyroscopeView gyroscopeView;
 
     public TestFragment() {
         // Required empty public constructor
@@ -54,7 +80,6 @@ public class TestFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mTestManager = TestManager.getInstance();
 
         View view = inflater.inflate(R.layout.fragment_test, container, false);
 
@@ -63,6 +88,8 @@ public class TestFragment extends Fragment {
         wrongAudioButton = view.findViewById(R.id.audio_wrong);
         correctAudioButton = view.findViewById(R.id.audio_correct);
         recorderWaveformView = view.findViewById(R.id.player_view_waveform);
+        degreeTextView = view.findViewById(R.id.degree_text_view);
+        gyroscopeView = view.findViewById(R.id.gyroscope_view);
 
         startRecordingButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -218,7 +245,6 @@ public class TestFragment extends Fragment {
                     mTestManager.setTestName(nameET.getEditText().getText().toString());
                     mTestManager.saveTest(getContext());
 
-
                     correctAudioButton.setVisibility(View.GONE);
                     wrongAudioButton.setVisibility(View.GONE);
                     recorderWaveformView.reset();
@@ -236,5 +262,20 @@ public class TestFragment extends Fragment {
                 bottomSheetDialog.cancel();
             }
         });
+    }
+
+    @Override
+    public void onOrientationChange(Acceleration acceleration) {
+        double accelerationMag = Math.sqrt(acceleration.X*acceleration.X+acceleration.Y*acceleration.Y+acceleration.Z*acceleration.Z);
+        double cosAngleInRadian = Math.acos(acceleration.Z/accelerationMag);
+
+        double cosAngleInDegree = Math.toDegrees(cosAngleInRadian);
+
+        double x = -(acceleration.X/accelerationMag);
+        double y = -(acceleration.Y/accelerationMag);
+
+        gyroscopeView.updateGyroscopeView(x,y,cosAngleInDegree);
+
+        degreeTextView.setText(String.valueOf(cosAngleInDegree));
     }
 }

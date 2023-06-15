@@ -1,35 +1,52 @@
 package com.humanebicycle.spirometer.utils;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 
 public class FileUtil {
 
-
+    static String parentDir = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "Spirometer"+File.separator;
 
     public static String getAppStorageDirectoryForAudio(){
-        String str = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "Spirometer"+File.separator+"audio"+File.separator;
+        checkIfParentDirExist();
+        String str = parentDir+"audio"+File.separator;
         File file = new File(str);
         if(!file.exists()){
-            file.mkdir();
+            if(!file.mkdir()){
+                Log.d("abh", "getAppStorageDirectoryForExports: can't create dir");
+            }
         }
         return str;
     }
     public static String getAppStorageDirectoryForTests(){
-        String str = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "Spirometer"+File.separator+"tests"+File.separator;
+        checkIfParentDirExist();
+        String str = parentDir+"tests"+File.separator;
         File file = new File(str);
         if(!file.exists()){
-            file.mkdir();
+            if(!file.mkdir()){
+                Log.d("abh", "getAppStorageDirectoryForExports: can't create dir");
+
+            }
         }
         return str;
     }
     public static String getAppStorageDirectoryForExports(){
-        String str = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "Spirometer"+File.separator+"exports"+File.separator;
+        checkIfParentDirExist();
+        String str = parentDir+"exports"+File.separator;
         File file = new File(str);
         if(!file.exists()){
-            file.mkdir();
+            if(!file.mkdir()){
+                Log.d("abh", "getAppStorageDirectoryForExports: can't create dir");
+            }
         }
         return str;
+    }
+    private static void checkIfParentDirExist(){
+        File parentFile = new File(parentDir);
+        if(!parentFile.exists()){
+            parentFile.mkdir();
+        }
     }
 }

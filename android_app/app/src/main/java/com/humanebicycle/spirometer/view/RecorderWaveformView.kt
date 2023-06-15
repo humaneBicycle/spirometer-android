@@ -1,12 +1,9 @@
-package com.humanebicycle.spirometer.ui
+package com.humanebicycle.spirometer.view
 
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
-import androidx.annotation.Nullable
 
 class RecorderWaveformView: View {
 
