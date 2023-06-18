@@ -41,7 +41,7 @@ import java.util.TimerTask;
 
 public class TestFragment extends Fragment implements OnOrientationChangeListener {
     Button startRecordingButton;
-    ImageView micImage;
+//    ImageView micImage;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
     ShapeableImageView wrongAudioButton, correctAudioButton;
     RecorderWaveformView recorderWaveformView;
@@ -52,6 +52,7 @@ public class TestFragment extends Fragment implements OnOrientationChangeListene
         super.onDetach();
         //remove all listeners, avoid memory leak
         mTestManager = TestManager.getInstance(this);
+        mTestManager.unRegisterAccelerometer();
 
     }
 
@@ -60,7 +61,7 @@ public class TestFragment extends Fragment implements OnOrientationChangeListene
         super.onAttach(context);
         //attack all the listeners
         mTestManager = TestManager.getInstance(this);
-
+        mTestManager.registerAccelerometer(getActivity());
 
     }
 
@@ -84,7 +85,7 @@ public class TestFragment extends Fragment implements OnOrientationChangeListene
         View view = inflater.inflate(R.layout.fragment_test, container, false);
 
         startRecordingButton=view.findViewById(R.id.record_button);
-        micImage = view.findViewById(R.id.record_audio_image);
+//        micImage = view.findViewById(R.id.record_audio_image);
         wrongAudioButton = view.findViewById(R.id.audio_wrong);
         correctAudioButton = view.findViewById(R.id.audio_correct);
         recorderWaveformView = view.findViewById(R.id.player_view_waveform);
@@ -126,7 +127,7 @@ public class TestFragment extends Fragment implements OnOrientationChangeListene
 
                     correctAudioButton.setVisibility(View.GONE);
                     wrongAudioButton.setVisibility(View.GONE);
-                    micImage.setVisibility(View.VISIBLE);
+//                    micImage.setVisibility(View.VISIBLE);
                     recorderWaveformView.setVisibility(View.GONE);
 
                     startRecordingButton.setCompoundDrawablesWithIntrinsicBounds(getActivity().getDrawable(R.drawable.baseline_play_arrow_24),null,null,null);
@@ -194,7 +195,7 @@ public class TestFragment extends Fragment implements OnOrientationChangeListene
     }
 
     private void startRecording(){
-        micImage.setVisibility(View.GONE);
+//        micImage.setVisibility(View.GONE);
         startRecordingButton.setCompoundDrawablesWithIntrinsicBounds(getActivity().getDrawable(R.drawable.baseline_pause_24),null,null,null);
         correctAudioButton.setVisibility(View.VISIBLE);
         wrongAudioButton.setVisibility(View.VISIBLE);

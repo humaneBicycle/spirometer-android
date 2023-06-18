@@ -31,6 +31,8 @@ public class TestLongClickOptions extends BottomSheetDialogFragment {
         View v = inflater.inflate(R.layout.test_long_click_options,container);
 
         MaterialButton exportCSVButton = v.findViewById(R.id.export_long_click);
+        MaterialButton delete = v.findViewById(R.id.delete_test_long_click);
+
         exportCSVButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -45,6 +47,13 @@ public class TestLongClickOptions extends BottomSheetDialogFragment {
 
                 }
 
+
+            }
+        });
+
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
             }
         });

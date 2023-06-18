@@ -108,6 +108,8 @@
                 android:layout_marginBottom="8dp"
                 android:background="@android:color/transparent"
                 android:textColor="?attr/colorOnBackground"
+                android:drawableTint="?attr/colorOnBackground"
+
                 />
 
             <com.google.android.material.button.MaterialButton
@@ -124,6 +126,7 @@
                 android:layout_marginBottom="8dp"
                 android:background="@android:color/transparent"
                 android:textColor="?attr/colorOnBackground"
+                android:drawableTint="?attr/colorOnBackground"
 
                 />
 
@@ -138,6 +141,7 @@
                 android:textSize="18sp"
                 android:textAlignment="textStart"
                 android:drawableRight="@drawable/ic_baseline_navigate_next_24"
+                android:drawableTint="?attr/colorOnBackground"
                 android:layout_marginBottom="8dp"
                 android:background="@android:color/transparent"
                 android:textColor="?attr/colorOnBackground"

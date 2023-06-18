@@ -32,9 +32,11 @@
     <string name="something_went_wrong">Something went wrong!</string>
     <string name="sync_tests">Sync Tests</string>
     <string name="export_test_as_csv">Export Test as CSV</string>
+    <string name="delete_test">Delete Test</string>
     <string name="export_all_tests">Export All Tests</string>
     <string name="tests_before">Tests Before</string>
     <string name="syncing">Syncing</string>
     <string name="sync_complete">Sync Complete</string>
     <string name="save">Save</string>
+    <string name="generate_results">Generate Results</string>
 </resources>

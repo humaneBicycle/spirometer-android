@@ -2,13 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="12dp">
+    android:layout_margin="12dp"
+    android:orientation="vertical">
 
     <com.google.android.material.button.MaterialButton
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/export_long_click"
         android:text="@string/export_test_as_csv"
+        android:textAllCaps="false"
+        android:fontFamily="@font/poppins_regular"
+        android:padding="16dp"
+        android:textSize="18sp"
+        android:textAlignment="textStart"
+        android:drawableRight="@drawable/ic_baseline_navigate_next_24"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/delete_test_long_click"
+        android:text="@string/delete_test"
         android:textAllCaps="false"
         android:fontFamily="@font/poppins_regular"
         android:padding="16dp"

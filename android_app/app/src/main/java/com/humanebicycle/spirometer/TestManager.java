@@ -138,7 +138,7 @@ public class TestManager {
         return test;
     }
 
-    private void registerAccelerometer(Activity activity){
+    public void registerAccelerometer(Activity activity){
         sensorManager = (SensorManager) activity.getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -149,7 +149,9 @@ public class TestManager {
                 onOrientationChangeListener.onOrientationChange(a);
                 if(STATE==State.RECORDING && test!=null) {
                     test.getAccelerationList().add(a);
+                    Log.d("abh", "onSensorChanged: added " + a + " to database.");
                 }
+
             }
 
             @Override
@@ -166,7 +168,11 @@ public class TestManager {
     }
 
     public void unRegisterAccelerometer(){
-        sensorManager.unregisterListener(sensorEventListener);
+        try {
+            sensorManager.unregisterListener(sensorEventListener);
+        }catch (NullPointerException e){
+            Log.w("abh", "unRegisterAccelerometer: unregistering sensor failed. null pointer" +e);
+        }
     }
 
 

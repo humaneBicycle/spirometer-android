@@ -29,7 +29,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
+    packagingOptions {
+        // Exclude these files because they conflict with those imported from the jDSP package
+        exclude 'META-INF/*'
+    }
 
 }
 
@@ -47,15 +50,30 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
+    def multidex_version = "2.0.1"
+    implementation "androidx.multidex:multidex:$multidex_version"
 
-    //xstream
+
+    //XStream, to save the models in database. serialise and write it in a file.
     implementation ('com.thoughtworks.xstream:xstream:1.4.11.1') {
         exclude group: 'xmlpull'
     }
 
-    //FFMPEG
-    implementation 'com.arthenica:mobile-ffmpeg-full:4.4'
-
+    //picasso, to load images from the internet
     implementation 'com.squareup.picasso:picasso:2.8'
+
+    //JDSP, scipy.signal alternative
+    implementation('com.github.psambit9791:jdsp:2.0.1', {
+        exclude group: 'org.apache.maven.surefire', module: 'common-java'
+        exclude group: 'org.apache.maven.surefire', module: 'surefire-api'
+    })
+
+
+    //Graphview
+    implementation 'com.jjoe64:graphview:4.2.2'
+
+
+    //J Librosa. load audio in float format
+    implementation files('libs\\jlib_without_depp.jar')
 
 }

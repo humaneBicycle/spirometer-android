@@ -71,4 +71,5 @@ public class SpirometerTest {
     public void setAccelerationList(List<Acceleration> accelerationList) {
         this.accelerationList = accelerationList;
     }
+
 }
