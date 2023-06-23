@@ -1,11 +1,14 @@
 package com.humanebicycle.spirometer;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -24,11 +27,12 @@ public class TestManager {
     SensorManager sensorManager;
     Sensor sensor;
     SensorEventListener sensorEventListener;
-    MediaRecorder mRecorder;
+    WavRecorder asyncRecorder;
     String mFileName;
 
     OnOrientationChangeListener onOrientationChangeListener;
 
+    int bufferSize=0;
     /**
      * These are the states for the test.
      */
@@ -43,6 +47,7 @@ public class TestManager {
 
     public TestManager(OnOrientationChangeListener onOrientationChangeListener) {
         this.onOrientationChangeListener=onOrientationChangeListener;
+        bufferSize = AudioRecord.getMinBufferSize(8000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
     }
 
     public State getCurrentState(){
@@ -58,33 +63,22 @@ public class TestManager {
     public void createTest(long time){
         STATE = State.INITIALISED;
 
-        String audioAddress = FileUtil.getAppStorageDirectoryForAudio() + String.valueOf(time)+".3gp";
+        String audioAddress = FileUtil.getAppStorageDirectoryForAudio() + String.valueOf(time)+".wav";
         mFileName = audioAddress;
         Log.d("abh", "audio address: "+audioAddress);
         test= new SpirometerTest(time,audioAddress);
     }
 
+    @SuppressLint("MissingPermission")
     public void startTest(Activity activity){
         if(test==null){
             throw new IllegalStateException("Can't start a test without creating it. current state: "+STATE);
         }
 
         if(STATE==State.INITIALISED){
-            mRecorder = new MediaRecorder();
-
-            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-            mRecorder.setOutputFile(mFileName);
+            asyncRecorder = new WavRecorder(test.getAudioAddress());
             Log.d("abh", "outsourcefile: "+mFileName);
-            try {
-                mRecorder.prepare();
-            } catch (IOException e) {
-                Log.e("TAG", "prepare() failed");
-                return;
-            }
-            mRecorder.start();
+            asyncRecorder.startRecording();
             registerAccelerometer(activity);
 
             STATE = State.RECORDING;
@@ -92,7 +86,7 @@ public class TestManager {
         }
 
         if(STATE==State.PAUSED){
-            mRecorder.resume();
+            asyncRecorder.resumeRecording();
             registerAccelerometer(activity);
             STATE=State.RECORDING;
             return;
@@ -103,7 +97,7 @@ public class TestManager {
     public void pauseTest(){
         if(STATE==State.RECORDING){
             unRegisterAccelerometer();
-            mRecorder.pause();
+            asyncRecorder.pauseRecording();
             STATE=State.PAUSED;
         }
     }
@@ -111,14 +105,12 @@ public class TestManager {
     public void discardTest(){
         unRegisterAccelerometer();
         if(STATE== TestManager.State.RECORDING) {
-            mRecorder.stop();
+            asyncRecorder.stopRecording();
         }
-        mRecorder.release();
         File file = new File(test.getAudioAddress());
         if(!file.delete()){
             Log.d("abh", "discardTest: t can't delete discarded audio file!");
         }
-        mRecorder=null;
         test = null;
         STATE = State.NOT_INITIALISED;
     }
@@ -128,8 +120,8 @@ public class TestManager {
         if(STATE==State.RECORDING){
             throw new IllegalStateException("Manager must be paused by calling pauseTest() before saving. current state: "+STATE);
         }
-        mRecorder.release();
-        mRecorder=null;
+        asyncRecorder.saveRecording();
+        asyncRecorder=null;
         test = null;
         STATE = State.NOT_INITIALISED;
     }
@@ -149,7 +141,6 @@ public class TestManager {
                 onOrientationChangeListener.onOrientationChange(a);
                 if(STATE==State.RECORDING && test!=null) {
                     test.getAccelerationList().add(a);
-                    Log.d("abh", "onSensorChanged: added " + a + " to database.");
                 }
 
             }
@@ -176,8 +167,8 @@ public class TestManager {
     }
 
 
-    public MediaRecorder getmRecorder(){
-        return this.mRecorder;
+    public WavRecorder getmRecorder(){
+        return this.asyncRecorder;
     }
 
 

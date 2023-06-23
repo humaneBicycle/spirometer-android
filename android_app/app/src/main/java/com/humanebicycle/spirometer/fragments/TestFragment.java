@@ -213,7 +213,7 @@ public class TestFragment extends Fragment implements OnOrientationChangeListene
         if(mTestManager.getCurrentState()== TestManager.State.RECORDING) {
             try {
                 int amplitude = mTestManager.getmRecorder().getMaxAmplitude();
-                recorderWaveformView.updateAmps(amplitude/10);
+                recorderWaveformView.updateAmps(amplitude);
             }catch (Exception e){
                 Log.e("abh", "isRecording reflected late. missed some seconds to plot waveform view" );
             }

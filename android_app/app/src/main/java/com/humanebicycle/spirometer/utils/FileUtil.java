@@ -43,10 +43,23 @@ public class FileUtil {
         }
         return str;
     }
+
+    public static String getAppStorageDirectoryForTemporaryAudioFile(){
+        checkIfParentDirExist();
+        String str = parentDir+"temp.file";
+        File file = new File(str);
+        if(file.exists()){
+            if(!file.delete()){
+                Log.e("abh", "getAppStorageDirectoryForTemporaryAudioFile: can't delete temp file." );
+            }
+        }
+        return str;
+    }
     private static void checkIfParentDirExist(){
         File parentFile = new File(parentDir);
         if(!parentFile.exists()){
             parentFile.mkdir();
         }
     }
+
 }

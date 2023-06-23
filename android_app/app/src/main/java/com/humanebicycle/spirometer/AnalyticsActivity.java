@@ -11,7 +11,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.widget.ProgressBar ;
+
 
 import com.github.psambit9791.jdsp.filter.Butterworth;
 import com.github.psambit9791.jdsp.transform.Hilbert;
@@ -23,7 +24,11 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.geometry.euclidean.twod.Line;
+import org.apache.commons.math3.transform.DftNormalization;
+import org.apache.commons.math3.transform.FastFourierTransformer;
+import org.apache.commons.math3.transform.TransformType;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,10 +68,6 @@ public class AnalyticsActivity extends AppCompatActivity {
         fragmentManager.beginTransaction().replace(R.id.preview_audio_fragment_root, PreviewAudioFragment.newInstance(test)).commit();
 
         resultGraphView.setTitle("Hilbert Envelope");
-        resultGraphView.getViewport().setXAxisBoundsManual(true);
-        resultGraphView.getViewport().setMinX(0);
-        resultGraphView.getViewport().setMaxX(100000);
-        resultGraphView.setHorizontalScrollBarEnabled(true);
 
 //        samplingRateDropDownView = findViewById(R.id.sample_rate_exposed_dropdown);
 //        filterDropDownView = findViewById(R.id.filter_exposed_dropdown);
@@ -131,10 +132,30 @@ public class AnalyticsActivity extends AppCompatActivity {
                     Log.d("abh", "run: butter filtering of data done!");
 
                     //step 3
-                    Hilbert hilbert = new Hilbert(band_pass_audio);
-                    hilbert.transform();
-                    double[] envelopeHatHilbert = hilbert.getAmplitudeEnvelope();
+//                    Hilbert hilbert = new Hilbert(band_pass_audio);
+//                    hilbert.transform();
+//                    double[] envelopeHatHilbert = hilbert.getAmplitudeEnvelope();
+
+                    // Pad the audio samples to the nearest power of 2
+                    int paddedLength = getNextPowerOf2(band_pass_audio.length);
+                    double[] paddedSamples = new double[paddedLength];
+                    System.arraycopy(band_pass_audio, 0, paddedSamples, 0, band_pass_audio.length);
+
+                    FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.STANDARD);
+                    Complex[] transformed = transformer.transform(paddedSamples, TransformType.FORWARD);
+                    double[] envelopeHatHilbert = new double[transformed.length];
+
+
+                    for (int i = 0; i < transformed.length; i++) {
+                        double real = transformed[i].getReal();
+                        double imag = transformed[i].getImaginary();
+                        envelopeHatHilbert[i] = Math.sqrt(real * real + imag * imag);
+                    }
+
+
                     Log.d("abh", "run: hilbert transform of data done!");
+
+
 
                     //step 4. take the abs of hilbert transform
 
@@ -171,9 +192,14 @@ public class AnalyticsActivity extends AppCompatActivity {
         double [] butterBandPass = butterworth.bandPassFilter(doubleSignal,order,cutoffLow,cutoffHigh);
 
         return butterBandPass;
-
     }
 
-
+    public static int getNextPowerOf2(int number) {
+        int power = 1;
+        while (power < number) {
+            power <<= 1;
+        }
+        return power;
+    }
 
 }
