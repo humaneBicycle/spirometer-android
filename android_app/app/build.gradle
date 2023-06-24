@@ -76,4 +76,9 @@ dependencies {
     //J Librosa. load audio in float format
     implementation files('libs\\jlib_without_depp.jar')
 
+
+    implementation 'io.github.quantimb-lab:hilbert_transform:1.0'
+
+    implementation 'com.microsoft.onnxruntime:onnxruntime-android:latest.release'
+
 }

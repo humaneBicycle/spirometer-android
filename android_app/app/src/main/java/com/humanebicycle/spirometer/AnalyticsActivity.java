@@ -15,7 +15,6 @@ import android.widget.ProgressBar ;
 
 
 import com.github.psambit9791.jdsp.filter.Butterworth;
-import com.github.psambit9791.jdsp.transform.Hilbert;
 import com.google.android.material.button.MaterialButton;
 import com.humanebicycle.spirometer.fragments.PreviewAudioFragment;
 import com.humanebicycle.spirometer.data.XStreamSerializer;
@@ -29,10 +28,20 @@ import org.apache.commons.math3.geometry.euclidean.twod.Line;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
+import org.apache.pdfbox.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.FloatBuffer;
+import java.util.HashMap;
 import java.util.stream.IntStream;
+
+import ai.onnxruntime.OnnxTensor;
+import ai.onnxruntime.OnnxTensorLike;
+import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtSession;
+import ca.yorku.lab.quantimb.Hilbert;
 
 
 public class AnalyticsActivity extends AppCompatActivity {
@@ -117,6 +126,7 @@ public class AnalyticsActivity extends AppCompatActivity {
                     mmr.setDataSource(AnalyticsActivity.this,uri);
                     String durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
                     int millSecond = Integer.parseInt(durationStr);
+
                     /**
                      * 1. Get the audio.wav in array of float
                      * 2. filter using butter_and_pass
@@ -124,7 +134,7 @@ public class AnalyticsActivity extends AppCompatActivity {
                      * 4. envolope_hat is absolute values of x_hillbert
                      */
                     //step 1
-                    float[] audio = jLibrosa.loadAndRead(test.getAudioAddress(),8000,millSecond/60);
+                    float[] audio = jLibrosa.loadAndRead(test.getAudioAddress(),16000,millSecond/60);
                     Log.d("abh", "run: audio loaded from jlibrosa");
 
                     //step 2
@@ -132,39 +142,41 @@ public class AnalyticsActivity extends AppCompatActivity {
                     Log.d("abh", "run: butter filtering of data done!");
 
                     //step 3
-//                    Hilbert hilbert = new Hilbert(band_pass_audio);
-//                    hilbert.transform();
-//                    double[] envelopeHatHilbert = hilbert.getAmplitudeEnvelope();
 
-                    // Pad the audio samples to the nearest power of 2
-                    int paddedLength = getNextPowerOf2(band_pass_audio.length);
-                    double[] paddedSamples = new double[paddedLength];
-                    System.arraycopy(band_pass_audio, 0, paddedSamples, 0, band_pass_audio.length);
-
-                    FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.STANDARD);
-                    Complex[] transformed = transformer.transform(paddedSamples, TransformType.FORWARD);
-                    double[] envelopeHatHilbert = new double[transformed.length];
-
-
-                    for (int i = 0; i < transformed.length; i++) {
-                        double real = transformed[i].getReal();
-                        double imag = transformed[i].getImaginary();
-                        envelopeHatHilbert[i] = Math.sqrt(real * real + imag * imag);
-                    }
+                    final double[] hilbertTransform = Hilbert.computeHilbertTransform(band_pass_audio);
+                    final double[] envelopeHilbert = Hilbert.computeSignalEnvelope(hilbertTransform);
 
 
                     Log.d("abh", "run: hilbert transform of data done!");
-
-
 
                     //step 4. take the abs of hilbert transform
 
 
                     //step 5display results
                     y=new LineGraphSeries<>();
-                    for(int i =0;i<envelopeHatHilbert.length;i++){
-                        y.appendData(new DataPoint(i+1,envelopeHatHilbert[i]),false,1000000);
+                    for(int i =0;i<envelopeHilbert.length;i++){
+                        y.appendData(new DataPoint(i+1,envelopeHilbert[i]),false,1000000);
                     }
+
+
+                    float[] float_band_pass_audio = new float[band_pass_audio.length];
+                    for (int i = 0 ; i < band_pass_audio.length; i++)
+                    {
+                        float_band_pass_audio[i] = (float) band_pass_audio[i];
+                    }
+
+                    AudioFeatureExtractor audioFeatureExtractor = new AudioFeatureExtractor(float_band_pass_audio,16000);
+                    float[] features = audioFeatureExtractor.getAudioFeatures();
+                    Log.d("abh", "run: extracted the features");
+
+
+
+                    predictFEV1(features,createORTSession(OrtEnvironment.getEnvironment()),OrtEnvironment.getEnvironment());
+                    Log.d("abh", "run: predicted the fev1");
+
+                    Log.d("abh", "run: predicting the fvc");
+
+
                     Log.d("abh", "run: series to graph added!!");
                     displayResults();
                     Log.d("abh", "run: showing results!!");
@@ -200,6 +212,39 @@ public class AnalyticsActivity extends AppCompatActivity {
             power <<= 1;
         }
         return power;
+    }
+
+    private OrtSession createORTSession(OrtEnvironment ortEnvironment) throws NullPointerException{
+        try {
+            InputStream inputStream = getResources().openRawResource(R.raw.rf_fev1);
+            byte[] fev1_model_array = IOUtils.toByteArray(inputStream);
+            return ortEnvironment.createSession(fev1_model_array);
+        }catch (Exception e){
+            Log.w("abh", "createORTSession: "+e );
+        }
+        return null;
+    }
+
+    private void predictFEV1(float[] input,OrtSession ortSession, OrtEnvironment ortEnvironment){
+        String inputName = ortSession.getInputNames().iterator().next();
+
+        FloatBuffer floatBuffer = FloatBuffer.wrap(input);
+
+        long[] longOfArray = {1,375};
+
+        try {
+            OnnxTensorLike onnxTensorLike = OnnxTensor.createTensor(ortEnvironment, floatBuffer, longOfArray);
+
+            HashMap<String, OnnxTensorLike> map = new HashMap<>();
+            map.put(inputName, onnxTensorLike);
+
+            OrtSession.Result result = ortSession.run(map);
+            float[][] predictedFEV1 = (float[][])result.get(0).getValue();
+            Log.d("abh", "result predictFEV1 value:" + predictedFEV1[0][0]);
+        }catch (Exception e){
+            Log.w("abh", "predictFEV1: "+e);
+        }
+
     }
 
 }
