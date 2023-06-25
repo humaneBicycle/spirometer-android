@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar ;
+import android.widget.TextView;
 
 
 import com.github.psambit9791.jdsp.filter.Butterworth;
@@ -42,6 +43,7 @@ import ai.onnxruntime.OnnxTensorLike;
 import ai.onnxruntime.OrtEnvironment;
 import ai.onnxruntime.OrtSession;
 import ca.yorku.lab.quantimb.Hilbert;
+import umontreal.ssj.util.sort.HilbertCurveMap;
 
 
 public class AnalyticsActivity extends AppCompatActivity {
@@ -56,6 +58,8 @@ public class AnalyticsActivity extends AppCompatActivity {
     GraphView resultGraphView;
     int x;
     LineGraphSeries<DataPoint> y;
+    float predictedFVC, predictedFEV1;
+    TextView predictedFVCTextView, predictedFEV1TextView;
 
 
     @Override
@@ -72,6 +76,8 @@ public class AnalyticsActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.analytics_progress_bar);
         resultView = findViewById(R.id.test_result_view);
         resultGraphView = findViewById(R.id.result_graph_view);
+        predictedFEV1TextView = findViewById(R.id.predicted_fev1_value);
+        predictedFVCTextView = findViewById(R.id.predicted_fvc_value);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.preview_audio_fragment_root, PreviewAudioFragment.newInstance(test)).commit();
@@ -110,6 +116,9 @@ public class AnalyticsActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 resultView.setVisibility(View.VISIBLE);
                 resultGraphView.addSeries(y);
+
+                predictedFEV1TextView.setText(String.valueOf(predictedFEV1));
+                predictedFVCTextView.setText(String.valueOf(predictedFVC));
             }
         });
 
@@ -145,14 +154,12 @@ public class AnalyticsActivity extends AppCompatActivity {
 
                     final double[] hilbertTransform = Hilbert.computeHilbertTransform(band_pass_audio);
                     final double[] envelopeHilbert = Hilbert.computeSignalEnvelope(hilbertTransform);
-
+                    calculateEnvelope(envelopeHilbert,500,500,16000);
 
                     Log.d("abh", "run: hilbert transform of data done!");
 
-                    //step 4. take the abs of hilbert transform
 
-
-                    //step 5display results
+                    //step plotting envelope graph
                     y=new LineGraphSeries<>();
                     for(int i =0;i<envelopeHilbert.length;i++){
                         y.appendData(new DataPoint(i+1,envelopeHilbert[i]),false,1000000);
@@ -171,11 +178,11 @@ public class AnalyticsActivity extends AppCompatActivity {
 
 
 
-                    predictFEV1(features,createORTSession(OrtEnvironment.getEnvironment()),OrtEnvironment.getEnvironment());
+                    predictFEV1(features,createFEV1ORTSession(OrtEnvironment.getEnvironment()),OrtEnvironment.getEnvironment());
                     Log.d("abh", "run: predicted the fev1");
 
-                    Log.d("abh", "run: predicting the fvc");
-
+                    predictFVC(features,createFVCORTSession(OrtEnvironment.getEnvironment()),OrtEnvironment.getEnvironment());
+                    Log.d("abh", "run: predicted the fvc");
 
                     Log.d("abh", "run: series to graph added!!");
                     displayResults();
@@ -188,6 +195,8 @@ public class AnalyticsActivity extends AppCompatActivity {
 
                 } catch (com.jlibrosa.audio.exception.FileFormatNotSupportedException e) {
                     Log.d("abh", "run: "+e);
+                }catch (Exception e){
+                    Log.w("abh", "run: "+e );
                 }
             }
         };
@@ -214,9 +223,20 @@ public class AnalyticsActivity extends AppCompatActivity {
         return power;
     }
 
-    private OrtSession createORTSession(OrtEnvironment ortEnvironment) throws NullPointerException{
+    private OrtSession createFEV1ORTSession(OrtEnvironment ortEnvironment) throws NullPointerException{
         try {
             InputStream inputStream = getResources().openRawResource(R.raw.rf_fev1);
+            byte[] fev1_model_array = IOUtils.toByteArray(inputStream);
+            return ortEnvironment.createSession(fev1_model_array);
+        }catch (Exception e){
+            Log.w("abh", "createORTSession: "+e );
+        }
+        return null;
+    }
+
+    private OrtSession createFVCORTSession(OrtEnvironment ortEnvironment) throws NullPointerException{
+        try {
+            InputStream inputStream = getResources().openRawResource(R.raw.rf_fvc);
             byte[] fev1_model_array = IOUtils.toByteArray(inputStream);
             return ortEnvironment.createSession(fev1_model_array);
         }catch (Exception e){
@@ -239,12 +259,50 @@ public class AnalyticsActivity extends AppCompatActivity {
             map.put(inputName, onnxTensorLike);
 
             OrtSession.Result result = ortSession.run(map);
-            float[][] predictedFEV1 = (float[][])result.get(0).getValue();
-            Log.d("abh", "result predictFEV1 value:" + predictedFEV1[0][0]);
+            float[][] resultArray = (float[][])result.get(0).getValue();
+            predictedFEV1=resultArray[0][0];
+            Log.d("abh", "result predictFEV1 value:" + resultArray[0][0]);
         }catch (Exception e){
             Log.w("abh", "predictFEV1: "+e);
         }
 
+    }
+
+    private void predictFVC(float[] input, OrtSession ortSession, OrtEnvironment ortEnvironment){
+        String inputName = ortSession.getInputNames().iterator().next();
+
+        FloatBuffer floatBuffer = FloatBuffer.wrap(input);
+
+        long[] longOfArray = {1,375};
+
+        try{
+            OnnxTensorLike onnxTensorLike = OnnxTensor.createTensor(ortEnvironment,floatBuffer,longOfArray);
+
+            HashMap<String,OnnxTensorLike> map = new HashMap<>();
+            map.put(inputName,onnxTensorLike);
+
+            OrtSession.Result result = ortSession.run(map);
+            float [][] resultArray = (float[][]) result.get(0).getValue();
+            predictedFVC=resultArray[0][0];
+
+        }catch (Exception e){
+            Log.w("abh", "predictFVC: "+e );
+        }
+    }
+
+    private void calculateEnvelope(double[] buffer,double attackTime, double releaseTime,int sampleRate){
+        double envelopeOut = 0.0f;
+        double gainAttack =(float) Math.exp(-1.0/(sampleRate*attackTime));
+        double gainRelease=(float) Math.exp(-1.0/(sampleRate*releaseTime));
+        for(int i = 0 ; i < buffer.length ; i++){
+            double envelopeIn = Math.abs(buffer[i]);
+            if(envelopeOut < envelopeIn){
+                envelopeOut = envelopeIn + gainAttack * (envelopeOut - envelopeIn);
+            } else {
+                envelopeOut = envelopeIn + gainRelease * (envelopeOut - envelopeIn);
+            }
+            buffer[i] = envelopeOut;
+        }
     }
 
 }

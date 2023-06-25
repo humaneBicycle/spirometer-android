@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.humanebicycle.spirometer.R;
+import com.humanebicycle.spirometer.data.XStreamSerializer;
 import com.humanebicycle.spirometer.model.SpirometerTest;
 import com.humanebicycle.spirometer.utils.CSVUtil;
 import com.humanebicycle.spirometer.utils.FileUtil;
@@ -21,8 +22,10 @@ import java.io.IOException;
 
 public class TestLongClickOptions extends BottomSheetDialogFragment {
     SpirometerTest test;
-    public TestLongClickOptions(SpirometerTest test){
+    RecordsAdapter recordsAdapter;
+    public TestLongClickOptions(RecordsAdapter recordsAdapter,SpirometerTest test){
         this.test=test;
+        this.recordsAdapter = recordsAdapter;
     }
 
     @Nullable
@@ -54,6 +57,17 @@ public class TestLongClickOptions extends BottomSheetDialogFragment {
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(XStreamSerializer.getInstance().deleteTest(test)){
+                    Toast.makeText(getContext(), "Successfully deleted!", Toast.LENGTH_SHORT).show();
+
+                    //update UI
+                    recordsAdapter.tests.remove(test);
+                    recordsAdapter.notifyDataSetChanged();
+                    dismiss();
+                }else{
+                    Toast.makeText(getContext(), "Something went wrong while deleting!", Toast.LENGTH_SHORT).show();
+
+                }
 
             }
         });

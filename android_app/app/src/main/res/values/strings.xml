@@ -39,4 +39,7 @@
     <string name="sync_complete">Sync Complete</string>
     <string name="save">Save</string>
     <string name="generate_results">Generate Results</string>
+    <string name="predicted_fev1_value">Predicted FEV1 Value</string>
+    <string name="predicted_fvc_value">Predicted FVC Value</string>
+    <string name="audio_envelope">Audio Envelope</string>
 </resources>

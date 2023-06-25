@@ -25,7 +25,7 @@ import java.util.List;
 
 public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordHolder> {
 
-    List<SpirometerTest> tests;
+    public List<SpirometerTest> tests;
     Context context;
 
     public RecordsAdapter (Context context, List<SpirometerTest> tests){
@@ -61,7 +61,7 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordHo
         holder.testRecordItemParent.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                TestLongClickOptions testLongClickOptions = new TestLongClickOptions(test);
+                TestLongClickOptions testLongClickOptions = new TestLongClickOptions(RecordsAdapter.this,test);
                 FragmentManager manager = ((AppCompatActivity)context).getSupportFragmentManager();
                 testLongClickOptions.show(manager,"testLongClickOptions");
                 return true;

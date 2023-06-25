@@ -84,6 +84,26 @@ public class XStreamSerializer {
 
     }
 
+    public boolean deleteTest(SpirometerTest test){
+        List<SpirometerTest> tests;
+        try {
+            tests = getPreviousTests();
+        }catch (IOException e){
+            Log.w("abh", "deleteTest: " );
+            return false;
+        }
+        for(int i =0;i<tests.size();i++){
+            if(test.getId()==tests.get(i).getId()){
+                File audioToDelete = new File(test.getAudioAddress());
+                File dbFileToDelete = new File(FileUtil.getAppStorageDirectoryForTests()+test.getId()+".txt");
+                return audioToDelete.delete() && dbFileToDelete.delete();
+            }
+        }
+
+        return false;
+    }
+
+
     public String serialize(Object object){
         return xstream.toXML(object);
     }

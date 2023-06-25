@@ -88,12 +88,52 @@
         android:layout_height="wrap_content"
         android:id="@+id/test_result_view"
         android:orientation="vertical"
+        android:padding="16dp"
         android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/predicted_fvc_value"
+                android:layout_weight="1"
+                android:textSize="18sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/predicted_fvc_value"
+                android:padding="4dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/predicted_fev1_value"
+                android:layout_weight="1"
+                android:textSize="18sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/predicted_fev1_value"
+                android:padding="4dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/audio_envelope"
+            android:textSize="24sp"/>
 
         <com.jjoe64.graphview.GraphView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/result_graph_view"/>
+            android:id="@+id/result_graph_view"
+            android:padding="4dp"/>
 
     </LinearLayout>
 

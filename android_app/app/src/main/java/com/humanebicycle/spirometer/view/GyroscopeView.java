@@ -54,19 +54,20 @@ public class GyroscopeView extends View {
         innerCircleX=x*radiusOuter;
         innerCircleY=y*radiusOuter;
         if(degreeZ<32 && degreeZ>28){
-//            if(y>-150 && y<-105 && x<100 && x>-100){
-                paint.setColor(Color.GREEN);
-//            }
+            paint.setColor(Color.GREEN);
+            Log.d("abh", "updateGyroscopeView: x"+innerCircleX+" y:"+innerCircleY);
         }else{
             paint.setColor(Color.RED);
         }
-//        Log.d("abh", "onOrientationChange: xc: "+innerCircleX+" yc:"+innerCircleY);
         invalidate();
     }
 
     @Override
     public void draw(Canvas canvas) {
+        //outer circle
         canvas.drawCircle(screenWidth/2,viewHeight/2,radiusOuter,paint);
+
+
 
         //inner circle
         canvas.drawCircle((int)innerCircleX+screenWidth/2,(viewHeight-2*radiusOuter)/2+radiusOuter+(int)innerCircleY,radiusInner,paint);

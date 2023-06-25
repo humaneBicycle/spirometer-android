@@ -61,7 +61,7 @@ public class ListFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            //update ui. test list feteched
+                            //update ui. test list fetched
                             progressBar.setVisibility(View.GONE);
                             recyclerView.setVisibility(View.VISIBLE);
 

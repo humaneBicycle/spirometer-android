@@ -67,18 +67,22 @@ public class PreviewAudioFragment extends Fragment {
 
         if(mMediaPlayer==null){
             mMediaPlayer = MediaPlayer.create(getContext(), Uri.parse(test.getAudioAddress()));
-            previewAudioSeekbar.setMax(mMediaPlayer.getDuration());
+            try {
+                previewAudioSeekbar.setMax(mMediaPlayer.getDuration());
 
-            int maxDuration = mMediaPlayer.getDuration();
-            timeTextView.setText(formatMilliSecond(maxDuration));
+                int maxDuration = mMediaPlayer.getDuration();
+                timeTextView.setText(formatMilliSecond(maxDuration));
 
-            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    playPauseButton.setImageDrawable(getResources().getDrawable(R.drawable.baseline_play_arrow_24));
+                mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mediaPlayer) {
+                        playPauseButton.setImageDrawable(getResources().getDrawable(R.drawable.baseline_play_arrow_24));
 
-                }
-            });
+                    }
+                });
+            }catch (NullPointerException e){
+                Log.w("abh", "onCreateView: "+e );
+            }
         }
 
         playPauseButton.setOnClickListener(new View.OnClickListener() {
