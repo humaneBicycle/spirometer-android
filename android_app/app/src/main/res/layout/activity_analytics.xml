@@ -123,17 +123,17 @@
                 android:padding="4dp"/>
         </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/audio_envelope"
-            android:textSize="24sp"/>
+<!--        <TextView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/audio_magnitude"-->
+<!--            android:textSize="24sp"/>-->
 
-        <com.jjoe64.graphview.GraphView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/result_graph_view"
-            android:padding="4dp"/>
+<!--        <com.jjoe64.graphview.GraphView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/result_graph_view"-->
+<!--            android:padding="4dp"/>-->
 
     </LinearLayout>
 

@@ -9,6 +9,9 @@
     <string name="cancel">Cancel</string>
     <string name="name">Name</string>
     <string name="please_enter_name">Please Enter Name</string>
+    <string name="please_enter_age">Please Enter Age</string>
+    <string name="please_enter_smoking">Please Enter Smoking</string>
+    <string name="please_enter_gender">Please Enter Gender</string>
     <string name="select_sample_rate">Select Sample Rate</string>
     <string name="select_filter">Select Filter</string>
     <string name="test_results">Test Results</string>
@@ -38,8 +41,12 @@
     <string name="syncing">Syncing</string>
     <string name="sync_complete">Sync Complete</string>
     <string name="save">Save</string>
+    <string name="age">Age</string>
+    <string name="gender">Gender</string>
+    <string name="smoke_ques">Do You Smoke?</string>
     <string name="generate_results">Generate Results</string>
     <string name="predicted_fev1_value">Predicted FEV1 Value</string>
     <string name="predicted_fvc_value">Predicted FVC Value</string>
     <string name="audio_envelope">Audio Envelope</string>
+    <string name="audio_magnitude">Audio Magnitude</string>
 </resources>

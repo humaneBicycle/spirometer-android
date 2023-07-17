@@ -12,5 +12,18 @@ public class Constants {
     public static final String CURRENT_TEST = "current_test_shared_pref";
     public static final int SAMPLE_RATE_8000=8000;
     public static final int SAMPLE_RATE_44100=44100;
+    public static final int DEFAULT_SAMPLE_RATE=22050;
+    private static int CURRENT_SAMPLE_RATE=0;
+
+    public static int getSamplingRate(){
+        if(CURRENT_SAMPLE_RATE==0){
+            return DEFAULT_SAMPLE_RATE;
+        }else{
+            return CURRENT_SAMPLE_RATE;
+        }
+    }
+    public static void setSampleRate(int sampleRate){
+        CURRENT_SAMPLE_RATE=sampleRate;
+    }
 
 }

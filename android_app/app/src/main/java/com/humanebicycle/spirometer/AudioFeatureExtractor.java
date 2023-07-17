@@ -3,6 +3,9 @@ package com.humanebicycle.spirometer;
 import android.util.Log;
 
 import com.github.psambit9791.jdsp.transform.ShortTimeFourier;
+import com.github.psambit9791.jdsp.windows.Rectangular;
+import com.humanebicycle.spirometer.model.SpirometerTest;
+import com.humanebicycle.spirometer.utils.CSVUtil;
 import com.jlibrosa.audio.JLibrosa;
 
 import org.apache.commons.math3.complex.Complex;
@@ -16,85 +19,96 @@ public class AudioFeatureExtractor {
     float[] signal;
     JLibrosa jLibrosa;
     int sampleRate;
+    SpirometerTest test;
 
-    public AudioFeatureExtractor(float[] signal, int sampleRate){
+    public AudioFeatureExtractor(float[] signal, int sampleRate,SpirometerTest test){
         this.signal=signal;
         this.sampleRate=sampleRate;
         jLibrosa = new JLibrosa();
+        this.test = test;
     }
 
     public float[] getAudioFeatures(){
         float [] stftFeatures = getSTFTSpectrogramFeatures(signal);
-        float [] melFeatures = getMELSpectrogramFeatures(signal);
-        float [] mfccFeatures = getMFCCFeatures(signal);
+//        float [] melFeatures = getMELSpectrogramFeatures(signal);
+//        float [] mfccFeatures = getMFCCFeatures(signal);
 
-        int size = stftFeatures.length+melFeatures.length+mfccFeatures.length;
+//        int size = stftFeatures.length+melFeatures.length+mfccFeatures.length;
+//
+//        Log.d("abh size", "stft: "+stftFeatures.length+" mel:"+melFeatures.length+" mfcc:"+mfccFeatures.length);
+//
+//        float [] toReturn=new float[size];
+//        /**
+//         * these 3 features are in order:
+//         * 1. stft
+//         * 2. mel
+//         * 3. mfcc
+//         */
+//        for(int i =0;i<size;i++){
+//            if(i<stftFeatures.length-1){
+//                toReturn[i]=stftFeatures[i];
+//            }else if(i>stftFeatures.length && i<stftFeatures.length+melFeatures.length){
+//                toReturn[i]=melFeatures[i-stftFeatures.length];
+//            }else if(i>stftFeatures.length+melFeatures.length){
+//                toReturn[i]=mfccFeatures[i-stftFeatures.length-melFeatures.length];
+//            }
+//
+//        }
+//
+//        Log.d("abh", "getAudioFeatures: before size:"+size+" after size:"+toReturn.length);
+////        for(int i =0;i<toReturn.length;i++){
+////            Log.d("abh", "getAudioFeatures: "+toReturn[i]);
+////        }
 
-        Log.d("abh size", "stft: "+stftFeatures.length+" mel:"+melFeatures.length+" mfcc:"+mfccFeatures.length);
-
-        float [] toReturn=new float[size];
-        for(int i =0;i<size;i++){
-            if(i<stftFeatures.length-1){
-                toReturn[i]=stftFeatures[i];
-            }else if(i>stftFeatures.length && i<stftFeatures.length+melFeatures.length){
-                toReturn[i]=melFeatures[i-stftFeatures.length];
-            }else if(i>stftFeatures.length+melFeatures.length){
-                toReturn[i]=mfccFeatures[i-stftFeatures.length-melFeatures.length];
-            }
-
-        }
-
-        Log.d("abh", "getAudioFeatures: before size:"+size+" after size:"+toReturn.length);
-
-        return toReturn;
+        return stftFeatures;
 
     }
 
     private float[] getSTFTSpectrogramFeatures(float[] signal){
-        double[] array = IntStream.range(0, signal.length).mapToDouble(i -> signal[i]).toArray();
-        ShortTimeFourier shortTimeFourier = new ShortTimeFourier(array,241);
-        shortTimeFourier.transform();
-        shortTimeFourier.getComplex(false);
-        Complex[][] complexes = shortTimeFourier.getComplex(false);
+//        double[] array = IntStream.range(0, signal.length).mapToDouble(i -> signal[i]).toArray();
+//        ShortTimeFourier shortTimeFourier = new ShortTimeFourier(array,1024);
+//        shortTimeFourier.transform();
+//        Complex[][] complexes = shortTimeFourier.getComplex(false);
+
 ////using jlibrosa
-//        Complex[][] complexes = jLibrosa.generateSTFTFeatures(signal,sampleRate,240);
-        float sum[] = new float[242];
-        for(int i =0;i<242;i++){
+        Complex[][] complexes = jLibrosa.generateSTFTFeatures(signal,sampleRate,40);
+        if(CSVUtil.exportAudioSTFT(complexes,test)){
+            Log.d("abh vvi", "exported audio stft ");
+        }
+
+
+        Log.d("vvi abh", "getSTFTSpectrogramFeatures: length complexes[0].length "+complexes[1].length+" complexes length:"+complexes.length);
+
+        for(int i =0;i<complexes.length;i++){
+            String str = new String();
+            for(int j =0;j<complexes[i].length;j++){
+                str = str+ "complex at i: "+i+" j:"+j+" is "+ complexes[i][j]+"\t";
+            }
+            Log.d("abh", str);
+        }
+
+        float sum[] = new float[complexes.length];
+        for(int i =0;i<complexes.length;i++){
             float sum_r=0f;
+            String str=new String();
             try {
-                for (int j = 0; j < complexes[0].length; j++) {
+                for (int j = 0; j < complexes[i].length; j++) {
                     try {
                         sum_r = sum_r + (float) complexes[i][j].abs();
+
                     } catch (NullPointerException e) {
                         Log.w("abh", "getSTFTSpectrogramFeatures: for index i " + i + " error" + e);
                     }
                 }
+                str = str + "at i = "+i+" sum is "+sum_r/complexes[i].length + " ";
+                Log.d("abh", str);
             }catch (IndexOutOfBoundsException e){
                 Log.w("abh", "getSTFTSpectrogramFeatures: "+e );
             }
-            sum[i]=sum_r;
+            sum[i]=sum_r/complexes[i].length;
         }
 
         return sum;
-    }
-
-    private float[] getMELSpectrogramFeatures(float[] signal){
-        double[][] MELSpectrogram = jLibrosa.generateMelSpectroGram(signal);
-        float sum[] = new float[MELSpectrogram.length];
-        for(int i =0;i<MELSpectrogram.length;i++){
-            float sum_r = 0f;
-            for(int j =0;j<MELSpectrogram[0].length;j++){
-                sum_r=sum_r+(float)MELSpectrogram[i][j];
-            }
-            sum[i]=sum_r;
-        }
-        return sum;
-    }
-
-    private float[] getMFCCFeatures(float[] signal){
-        float[][] MFCCFeatures = jLibrosa.generateMFCCFeatures(signal,sampleRate,5,480,16,240);
-        float[] meanMFCCFeatures = jLibrosa.generateMeanMFCCFeatures(MFCCFeatures,5,480);
-        return meanMFCCFeatures;
     }
 
 }

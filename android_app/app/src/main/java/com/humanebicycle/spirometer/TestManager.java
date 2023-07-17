@@ -157,6 +157,12 @@ public class TestManager {
     public void setTestName(String name){
         test.setName(name);
     }
+    public void setTestAge(int age){
+        test.setAge(age);
+    }
+    public void setTestSmokeStatus(boolean b){
+        test.setSmoker(b);
+    }
 
     public void unRegisterAccelerometer(){
         try {

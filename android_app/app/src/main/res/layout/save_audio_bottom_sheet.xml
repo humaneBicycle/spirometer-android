@@ -12,12 +12,12 @@
         app:startIconDrawable="@drawable/baseline_save_24"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/save"
+        android:hint="@string/name"
         app:boxCornerRadiusBottomEnd="16dp"
         app:boxCornerRadiusTopEnd="16dp"
         app:boxCornerRadiusBottomStart="16dp"
         app:boxCornerRadiusTopStart="16dp"
-        >
+        android:layout_margin="12dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/nameEt"
@@ -27,6 +27,67 @@
             />
 
     </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/age_et_save_audio_bottom_sheet"
+        app:startIconTint="?attr/colorPrimary"
+        app:startIconDrawable="@drawable/baseline_save_24"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/age"
+        app:boxCornerRadiusBottomEnd="16dp"
+        app:boxCornerRadiusTopEnd="16dp"
+        app:boxCornerRadiusBottomStart="16dp"
+        app:boxCornerRadiusTopStart="16dp"
+        android:layout_margin="12dp"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/ageEt"
+            android:layout_width="match_parent"
+            android:inputType="number"
+            android:layout_height="match_parent"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayout22"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:hint="@string/gender"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="12dp">
+
+            <AutoCompleteTextView
+                android:id="@+id/gender_exposed_dropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayout23"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:hint="@string/smoke_ques"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="12dp"
+            >
+
+            <AutoCompleteTextView
+                android:id="@+id/smoke_exposed_dropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,6 +27,7 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.humanebicycle.spirometer.AnalyticsActivity;
 import com.humanebicycle.spirometer.Constants;
@@ -224,32 +227,64 @@ public class TestFragment extends Fragment implements OnOrientationChangeListene
         TextInputLayout nameET = bottomSheetDialog.findViewById(R.id.name_et_save_audio_bottom_sheet);
         Button positiveButton = bottomSheetDialog.findViewById(R.id.ok_button_save_bottom_sheet);
         Button negativeButton = bottomSheetDialog.findViewById(R.id.cancel_button_save_bottom_sheet);
+        TextInputEditText ageET = bottomSheetDialog.findViewById(R.id.ageEt);
+
+        AutoCompleteTextView smokeDropDown, genderDropDown;
+        smokeDropDown = bottomSheetDialog.findViewById(R.id.smoke_exposed_dropdown);
+        genderDropDown = bottomSheetDialog.findViewById(R.id.gender_exposed_dropdown);
+
+
+        String[] genders = new String[]{"Male","Female","Other"};
+        String[] smokingOptions = new String[]{"Yes","No"};
+
+        ArrayAdapter<String> genderAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_textview,genders);
+        genderDropDown.setAdapter(genderAdapter);
+
+        ArrayAdapter<String> smokingOptionAdapter = new ArrayAdapter<>(getActivity(),R.layout.dropdown_textview,smokingOptions);
+        smokeDropDown.setAdapter(smokingOptionAdapter);
 
         nameET.setSelected(true);
 
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!nameET.getEditText().getText().toString().equals("")) {
-                    Log.d("abh", "saving and adding audio to storgae: ");
-
-                    Toast.makeText(getContext(), "Recording Saved!", Toast.LENGTH_SHORT).show();
-
-                    Intent i = new Intent(getActivity(),AnalyticsActivity.class);
-                    i.putExtra(Constants.CURRENT_TEST,XStreamSerializer.getInstance().serialize(mTestManager.getCurrentTest()));
-                    startActivity(i);
-
-                    mTestManager.setTestName(nameET.getEditText().getText().toString());
-                    mTestManager.saveTest(getContext());
-
-                    correctAudioButton.setVisibility(View.GONE);
-                    wrongAudioButton.setVisibility(View.GONE);
-                    recorderWaveformView.reset();
-
-                    bottomSheetDialog.cancel();
-                }else{
+                if(nameET.getEditText().getText().toString().equals("")) {
                     Toast.makeText(getContext(), getResources().getString(R.string.please_enter_name), Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                if(ageET.getText().toString().equals("")){
+                    Toast.makeText(getContext(), getResources().getString(R.string.please_enter_age), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(smokeDropDown.getEditableText().toString().equals("")){
+                    Toast.makeText(getContext(), getResources().getString(R.string.please_enter_smoking), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(genderDropDown.getEditableText().toString().equals("")){
+                    Toast.makeText(getContext(), getResources().getString(R.string.please_enter_gender), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Log.d("abh", "saving and adding audio to storgae: ");
+
+                Toast.makeText(getContext(), "Recording Saved!", Toast.LENGTH_SHORT).show();
+
+                Intent i = new Intent(getActivity(),AnalyticsActivity.class);
+                i.putExtra(Constants.CURRENT_TEST,XStreamSerializer.getInstance().serialize(mTestManager.getCurrentTest()));
+                startActivity(i);
+
+                mTestManager.setTestName(nameET.getEditText().getText().toString());
+                mTestManager.setTestAge(Integer.parseInt(ageET.getText().toString()));
+
+                //TODO add smoke these to test and then add soo that they are exported while exporting csv
+
+                mTestManager.saveTest(getContext());
+
+                correctAudioButton.setVisibility(View.GONE);
+                wrongAudioButton.setVisibility(View.GONE);
+                recorderWaveformView.reset();
+
+                bottomSheetDialog.cancel();
             }
         });
 

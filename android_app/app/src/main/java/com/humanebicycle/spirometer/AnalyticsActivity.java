@@ -3,6 +3,9 @@ package com.humanebicycle.spirometer;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.media.AudioFormat;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,11 +39,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.IntStream;
 
+import ai.onnxruntime.NodeInfo;
 import ai.onnxruntime.OnnxTensor;
 import ai.onnxruntime.OnnxTensorLike;
 import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
 import ca.yorku.lab.quantimb.Hilbert;
 import umontreal.ssj.util.sort.HilbertCurveMap;
@@ -48,14 +54,14 @@ import umontreal.ssj.util.sort.HilbertCurveMap;
 
 public class AnalyticsActivity extends AppCompatActivity {
 
-//    AutoCompleteTextView samplingRateDropDownView, filterDropDownView;
+//    AutoCompleteTextView `sampling`RateDropDownView, filterDropDownView;
     MaterialButton analyzeAudio;
     SpirometerTest test;
     float[] toPlotX;
     float[] toPlotY;
     ProgressBar progressBar;
     LinearLayout resultView;
-    GraphView resultGraphView;
+//    GraphView resultGraphView;
     int x;
     LineGraphSeries<DataPoint> y;
     float predictedFVC, predictedFEV1;
@@ -75,14 +81,13 @@ public class AnalyticsActivity extends AppCompatActivity {
         analyzeAudio = findViewById(R.id.analyze_audio);
         progressBar = findViewById(R.id.analytics_progress_bar);
         resultView = findViewById(R.id.test_result_view);
-        resultGraphView = findViewById(R.id.result_graph_view);
+//        resultGraphView = findViewById(R.id.result_graph_view);
         predictedFEV1TextView = findViewById(R.id.predicted_fev1_value);
         predictedFVCTextView = findViewById(R.id.predicted_fvc_value);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.preview_audio_fragment_root, PreviewAudioFragment.newInstance(test)).commit();
 
-        resultGraphView.setTitle("Hilbert Envelope");
 
 //        samplingRateDropDownView = findViewById(R.id.sample_rate_exposed_dropdown);
 //        filterDropDownView = findViewById(R.id.filter_exposed_dropdown);
@@ -115,7 +120,7 @@ public class AnalyticsActivity extends AppCompatActivity {
             public void run() {
                 progressBar.setVisibility(View.GONE);
                 resultView.setVisibility(View.VISIBLE);
-                resultGraphView.addSeries(y);
+//                resultGraphView.addSeries(y);
 
                 predictedFEV1TextView.setText(String.valueOf(predictedFEV1));
                 predictedFVCTextView.setText(String.valueOf(predictedFVC));
@@ -143,36 +148,50 @@ public class AnalyticsActivity extends AppCompatActivity {
                      * 4. envolope_hat is absolute values of x_hillbert
                      */
                     //step 1
-                    float[] audio = jLibrosa.loadAndRead(test.getAudioAddress(),16000,millSecond/60);
+//                   set the global sampling rate
+                    MediaExtractor mex = new MediaExtractor();
+                    try {
+                        mex.setDataSource(test.getAudioAddress());// the adresss location of the sound on sdcard.
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                    MediaFormat mf = mex.getTrackFormat(0);
+
+                    int sampleRate = mf.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+                    Constants.setSampleRate(sampleRate);
+                    Log.d("abh", "local sample rate: "+sampleRate+" global:"+Constants.getSamplingRate());
+
+                    float[] audio = jLibrosa.loadAndRead(test.getAudioAddress(),Constants.getSamplingRate(),millSecond/60);
                     Log.d("abh", "run: audio loaded from jlibrosa");
 
                     //step 2
-                    double[] band_pass_audio = butterBandpassFilter(audio,1500,2500,8000,10);
+//                    double[] band_pass_audio = butterBandpassFilter(audio,3000,5000,Constants.getSamplingRate(),5);
                     Log.d("abh", "run: butter filtering of data done!");
 
                     //step 3
 
-                    final double[] hilbertTransform = Hilbert.computeHilbertTransform(band_pass_audio);
-                    final double[] envelopeHilbert = Hilbert.computeSignalEnvelope(hilbertTransform);
-                    calculateEnvelope(envelopeHilbert,500,500,16000);
+
+//                    final float[] toPlot = calculateEnvelope(envelope);
 
                     Log.d("abh", "run: hilbert transform of data done!");
 
 
                     //step plotting envelope graph
                     y=new LineGraphSeries<>();
-                    for(int i =0;i<envelopeHilbert.length;i++){
-                        y.appendData(new DataPoint(i+1,envelopeHilbert[i]),false,1000000);
-                    }
+//                    for(int i =0;i<envelope.length;i++){
+//                        y.appendData(new DataPoint(i+1,envelope[i]),true,envelope.length);
+//                    }
 
 
-                    float[] float_band_pass_audio = new float[band_pass_audio.length];
-                    for (int i = 0 ; i < band_pass_audio.length; i++)
-                    {
-                        float_band_pass_audio[i] = (float) band_pass_audio[i];
-                    }
+//                    float[] float_band_pass_audio = new float[band_pass_audio.length];
+//                    for (int i = 0 ; i < band_pass_audio.length; i++)
+//                    {
+//                        float_band_pass_audio[i] = (float) band_pass_audio[i];
+//                    }
 
-                    AudioFeatureExtractor audioFeatureExtractor = new AudioFeatureExtractor(float_band_pass_audio,16000);
+                    AudioFeatureExtractor audioFeatureExtractor = new AudioFeatureExtractor(audio,Constants.getSamplingRate(),test);
                     float[] features = audioFeatureExtractor.getAudioFeatures();
                     Log.d("abh", "run: extracted the features");
 
@@ -215,14 +234,6 @@ public class AnalyticsActivity extends AppCompatActivity {
         return butterBandPass;
     }
 
-    public static int getNextPowerOf2(int number) {
-        int power = 1;
-        while (power < number) {
-            power <<= 1;
-        }
-        return power;
-    }
-
     private OrtSession createFEV1ORTSession(OrtEnvironment ortEnvironment) throws NullPointerException{
         try {
             InputStream inputStream = getResources().openRawResource(R.raw.rf_fev1);
@@ -250,7 +261,7 @@ public class AnalyticsActivity extends AppCompatActivity {
 
         FloatBuffer floatBuffer = FloatBuffer.wrap(input);
 
-        long[] longOfArray = {1,375};
+        long[] longOfArray = {1,1025};
 
         try {
             OnnxTensorLike onnxTensorLike = OnnxTensor.createTensor(ortEnvironment, floatBuffer, longOfArray);
@@ -270,10 +281,9 @@ public class AnalyticsActivity extends AppCompatActivity {
 
     private void predictFVC(float[] input, OrtSession ortSession, OrtEnvironment ortEnvironment){
         String inputName = ortSession.getInputNames().iterator().next();
-
         FloatBuffer floatBuffer = FloatBuffer.wrap(input);
 
-        long[] longOfArray = {1,375};
+        long[] longOfArray = {1,1025};
 
         try{
             OnnxTensorLike onnxTensorLike = OnnxTensor.createTensor(ortEnvironment,floatBuffer,longOfArray);
@@ -286,23 +296,61 @@ public class AnalyticsActivity extends AppCompatActivity {
             predictedFVC=resultArray[0][0];
 
         }catch (Exception e){
-            Log.w("abh", "predictFVC: "+e );
+            Log.e("abh", "predictFVC: "+e );
         }
     }
 
-    private void calculateEnvelope(double[] buffer,double attackTime, double releaseTime,int sampleRate){
-        double envelopeOut = 0.0f;
-        double gainAttack =(float) Math.exp(-1.0/(sampleRate*attackTime));
-        double gainRelease=(float) Math.exp(-1.0/(sampleRate*releaseTime));
-        for(int i = 0 ; i < buffer.length ; i++){
-            double envelopeIn = Math.abs(buffer[i]);
-            if(envelopeOut < envelopeIn){
-                envelopeOut = envelopeIn + gainAttack * (envelopeOut - envelopeIn);
-            } else {
-                envelopeOut = envelopeIn + gainRelease * (envelopeOut - envelopeIn);
-            }
-            buffer[i] = envelopeOut;
-        }
+    private float[] calculateEnvelope(double[] buffer,int window){
+        float[] toPlot = new float[buffer.length];
+
+
+        return toPlot;
     }
+
+//    public double[] extract(File inputFile) {
+//        AudioInputStream in = null;
+//        try {
+//            in = AudioSystem.getAudioInputStream(inputFile);
+//        } catch (Exception e) {
+//            System.out.println("Cannot read audio file");
+//            return new double[0];
+//        }
+//        AudioFormat format = in.getFormat();
+//        byte[] audioBytes = readBytes(in);
+//
+//        int[] result = null;
+//        if (format.getSampleSizeInBits() == 16) {
+//            int samplesLength = audioBytes.length / 2;
+//            result = new int[samplesLength];
+//            if (format.isBigEndian()) {
+//                for (int i = 0; i < samplesLength; ++i) {
+//                    byte MSB = audioBytes[i * 2];
+//                    byte LSB = audioBytes[i * 2 + 1];
+//                    result[i] = MSB << 8 | (255 & LSB);
+//                }
+//            } else {
+//                for (int i = 0; i < samplesLength; i += 2) {
+//                    byte LSB = audioBytes[i * 2];
+//                    byte MSB = audioBytes[i * 2 + 1];
+//                    result[i / 2] = MSB << 8 | (255 & LSB);
+//                }
+//            }
+//        } else {
+//            int samplesLength = audioBytes.length;
+//            result = new int[samplesLength];
+//            if (format.getEncoding().toString().startsWith("PCM_SIGN")) {
+//                for (int i = 0; i < samplesLength; ++i) {
+//                    result[i] = audioBytes[i];
+//                }
+//            } else {
+//                for (int i = 0; i < samplesLength; ++i) {
+//                    result[i] = audioBytes[i] - 128;
+//                }
+//            }
+//        }
+//
+//        return result;
+//    }
+
 
 }

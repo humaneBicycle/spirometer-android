@@ -10,15 +10,10 @@ public class SpirometerTest {
     public boolean isProcessed=false;
 
     public List<Acceleration> accelerationList;
+    String gender;
+    int age;
+    boolean isSmoker;
 
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public long id;
 
@@ -70,6 +65,39 @@ public class SpirometerTest {
 
     public void setAccelerationList(List<Acceleration> accelerationList) {
         this.accelerationList = accelerationList;
+    }
+
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public boolean isSmoker() {
+        return isSmoker;
+    }
+
+    public void setSmoker(boolean smoker) {
+        isSmoker = smoker;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
 }

@@ -1,8 +1,12 @@
 package com.humanebicycle.spirometer.utils;
 
+import android.util.Log;
+
 import com.humanebicycle.spirometer.data.XStreamSerializer;
 import com.humanebicycle.spirometer.model.Acceleration;
 import com.humanebicycle.spirometer.model.SpirometerTest;
+
+import org.apache.commons.math3.complex.Complex;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -71,5 +75,44 @@ public class CSVUtil {
             }
         }
         return sb.toString();
+    }
+    public static boolean exportAudioSTFT(Complex[][] complexes,SpirometerTest test){
+        StringBuilder sb = new StringBuilder();
+        for(int i =0;i<complexes.length;i++){
+            for(int j =0;j<complexes[i].length;j++){
+                Complex complex = complexes[i][j];
+                StringBuilder cellBuilder = new StringBuilder();
+                if(String.valueOf(complex.getReal()).equals("")){
+                    cellBuilder.append(0);
+                }else {
+                    cellBuilder.append(complex.getReal());
+                }
+
+                if(complex.getImaginary()>=0){
+                    cellBuilder.append("+");
+                }
+
+                cellBuilder.append(complex.getImaginary());
+                cellBuilder.append("j,");
+                String cell = cellBuilder.toString();
+                sb.append(cell);
+            }
+            sb.append("\n");
+        }
+        String fileName = FileUtil.getAppStorageDirectoryForExports()+test.getName()+"_"+test.getId()+".csv";
+        File file = new File(fileName);
+        if(file.exists()){
+            file.delete();
+        }
+        try {
+            FileWriter fileWriter  =new FileWriter(file);
+            fileWriter.write(sb.toString());
+            fileWriter.close();
+        } catch (IOException e) {
+            Log.w("abh", "exportAudioSTFT: "+e );
+            return false;
+        }
+        return true;
+
     }
 }
