@@ -10,7 +10,7 @@ The Jupyter Notebook `Feature_Extractor.ipynb` provides the feature extraction p
 
 ## Usage
 
-Feature Extractor uses the [audio_samples](/Feature%20Extractor/Data/audio_samples/) and [ncs](/Feature%20Extractor/Data/ncs//) folder to extract the features. The extracted features are stored in [Autoclip_3000_5000_N95_FEATURES](/Feature%20Extractor/Data/Autoclip_3000_5000_N95_FEATURES.npy) and [NCS_FEATURES](/Feature%20Extractor/Data/NCS_FEATURES.npy) respectively.
+Feature Extractor uses the [audio_samples](/methodology/Feature%20Extractor/Data/audio_samples/) and [ncs](/methodology/Feature%20Extractor/Data/ncs//) folder to extract the features. The extracted features are stored in [Autoclip_3000_5000_N95_FEATURES](/methodology/Feature%20Extractor/Data/Autoclip_3000_5000_N95_FEATURES.npy) and [NCS_FEATURES](/methodology/Feature%20Extractor/Data/NCS_FEATURES.npy) respectively.
 
 # [Model training](/ML%20Model%20Training/)
 
