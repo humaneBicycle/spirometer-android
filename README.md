@@ -81,4 +81,7 @@ Accuracy of the model on the dataset:
 The model performed fairly accurately with mean absolute percentage errors of
 6.05% for FEV1 and 5.77% for FVC respectively.
 
-
+# THIS REPOSITORY
+1. [android_app](android_app/) contains the android app. 
+2. [deployed_model](deployed_model/) contains the versions of deployed models
+3. [methodology](methodology/) contains the Method, Model and the data used to train the model.
