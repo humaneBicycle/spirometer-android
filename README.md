@@ -64,19 +64,7 @@ model is trained is the same as that on the model.
 
 ![alt text](image-1.png)
 
-# Visual Feedback
-
-One of the biggest aspects of the project was to provide user feedback on
-the forced maneuver. Visual feedback was given on:
-1. Orientation
-How the orientation of the phone should be. Keeping the phone at an
-angle where the maneuver was best recorded. It was decided to be
-between 28 to 32 degrees from the horizontal plane.
-2. Acceleration of device.
-The acceleration of the device was recorded during the breathing
-maneuver. This is recorded in the test and can be exported from the
-app.
-
+# Results 
 Accuracy of the model on the dataset:
 The model performed fairly accurately with mean absolute percentage errors of
 6.05% for FEV1 and 5.77% for FVC respectively.
@@ -86,19 +74,3 @@ The model performed fairly accurately with mean absolute percentage errors of
 2. [deployed_model](deployed_model/) contains the versions of deployed models
 3. [methodology](methodology/) contains the Method, Model and the data used to train the model.
 
-References
-1. Adhikary, Rishiraj & Lodhavia, Dhruvi & Francis, Chris & Patil, Rohit &
-Srivastava, Tanmay & Khanna, Prerna & Batra, Nipun & Breda, Joe &
-Peplinski, Jacob & Patel, Shwetak. (2022). SpiroMask: Measuring Lung
-Function Using Consumer-Grade Masks.
-2. Thap, T.; Chung, H.; Jeong, C.; Hwang, K.-E.; Kim, H.-R.; Yoon, K.-H.;
-Lee, J. High-Resolution Time-Frequency Spectrum-Based Lung Function
-Test from a Smartphone Microphone. Sensors 2016, 16, 1305.
-https://doi.org/10.3390/s16081305
-3. Eric C. Larson, Mayank Goel, Gaetano Boriello, Sonya Heltshe, Margaret
-Rosenfeld, and Shwetak N. Patel. 2012. SpiroSmart: using a microphone to
-measure lung function on a mobile phone. In Proceedings of the 2012 ACM
-Conference on Ubiquitous Computing (UbiComp '12). ACM, New York,
-NY, USA, 280-289. DOI=http://dx.doi.org/10.1145/2370216.2370261
-4. [Deploying Scikit-Learn Models In Android Apps With ONNX by Shubham
-Panchal](https://towardsdatascience.com/deploying-scikit-learn-models-in-android-apps-with-onnx-b3adabe16bab)
